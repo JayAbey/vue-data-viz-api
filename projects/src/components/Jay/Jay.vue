@@ -1,105 +1,85 @@
 <template>
-  <div id="mapCanvas">
+  <div class="yoobeeMap" :id="mapCanvas">
     This is the Campuses page.
+    <!--<Tilly v-bind:tilly="tilly"></Tilly>-->
   </div>
 </template>
 
 <script>
-export default {
-  name: 'campus',
-  data() {
-    return {
-      campuses: [
-        {
-          name: "Auckland",
-          position: { lat: -36.856864, lng: 174.764417 }
-        },
-        {
-          name: "Christchurch",
-          position: { lat: -43.520430, lng: 172.567893 }
-        },
-        {
-          name: "Wellington",
-          position: { lat: -41.279016, lng: 174.780304 }
-        }
-      ],
-      //set up map - NZ
-      mapConfig: {
-        center: { lat: -40.9006, lng: 174.8860 },
-        zoom: 12,
-        styles: [
-          {
-            "featureType": "all",
-            "elementType": "all",
-            "stylers": [
-              {
-                "hue": "#ff6800"
-              },
-              {
-                "saturation": "20"
-              },
-              {
-                "lightness": "-8"
-              },
-              {
-                "gamma": "1.00"
-              },
-              {
-                "weight": "1.12"
-              }
-            ]
-          }
-        ]
-      }
+// import Tilly from '../Tilly/Tilly'
+// import { db } from 'firebase'
 
+export default {
+  name: 'yoobeeMap',
+  props: ['name'],
+  // tilly: '',
+
+  data: function() {
+    return {
+      mapCanvas: this.name + "-map",
+      campuses: [{
+        name: "Auckland",
+        latitude: -36.856864,
+        longitude: 174.764417
+      },
+      {
+        name: "Christchurch",
+        latitude: -43.520430,
+        longitude: 172.567893
+      },
+      {
+        name: "Wellington",
+        latitude: -41.279016,
+        longitude: 174.780304
+      }],
+      map: null,
+      bounds: null,
+      markers: []
     }
   },
-  methods: {
-    initMap: function() {
-      var map = new google.maps.Map(document.getElementById('mapCanvas'), this.mapConfig),
-        //create the Places service
-        service = new google.maps.places.PlacesService(map);
 
-      //perform a nearby search
-      service.nearbySearch({
-        location: { lat: -40.9006, lng: 174.8860 },
-        radius: 500
-      }, callback);
-    },
+  // firebase: {
+    // courses: {
+    //   source: db.ref('courses'),
+    //   cancelCallback(err) {
+    //     console.log(err);
+    //   }
+    // }
+  // },
 
-    callback: function(results, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        createMarker(results);
-      }
-    },
+  // components: {
+  //   Tilly
+  // },
 
-    createMarker: function(campuses) {
-      for (var i = 0, campus; campus = campuses[i]; i++) {
-        var image = {
-          url: campus.icon,
-          size: new google.maps.Size(71, 71),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(17, 34),
-          scaledSize: new google.maps.Size(25, 25)
-        };
-
-        var marker = new google.maps.Marker({
-          map: map,
-          icon: image,
-          title: campus.name,
-          position: campus.geometry.location
-        });
-      }
-
+  mounted: function() {
+    this.bounds = new google.maps.LatLngBounds();
+    const element = document.getElementById(this.mapCanvas)
+    const mapCentre = this.campuses[0]
+    const config = {
+      zoom: 12,
+      center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude)
     }
+    this.map = new google.maps.Map(element, config);
+
+    this.campuses.forEach((coord) => {
+      const position = new google.maps.LatLng(coord.latitude, coord.longitude);
+      const marker = new google.maps.Marker({ position, map: this.map });
+
+      this.markers.push(marker)
+      this.map.fitBounds(this.bounds.extend(position))
+    });
   }
-}
+
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#mapCanvas {
-  height: 100%;
+.yoobeeMap {
+  width: 800px;
+  height: 600px;
+  margin: 0 auto;
+  background: gray;
 }
 
 html,
