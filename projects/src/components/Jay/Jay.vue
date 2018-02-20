@@ -1,13 +1,17 @@
 <template>
-  <div class="yoobeeMap" :id="mapCanvas">
-    This is the Campuses page.
+  <div>
+    <div class="yoobeeMap" :id="mapCanvas"></div>
+
     <!--<Tilly v-bind:tilly="tilly"></Tilly>-->
+    <div class="click" v-on:click="getCourses">CLICK ME {{ course }}
+      <!--<div v-for="campus in campuses">{{ campus.Name }}</div>-->
+    </div>
   </div>
 </template>
 
 <script>
 // import Tilly from '../Tilly/Tilly'
-// import { db } from 'firebase'
+import { db } from '../../firebase'
 
 export default {
   name: 'yoobeeMap',
@@ -34,30 +38,53 @@ export default {
       }],
       map: null,
       bounds: null,
-      markers: []
+      markers: [],
+      course: ''
     }
   },
 
-  // firebase: {
-    // courses: {
-    //   source: db.ref('courses'),
-    //   cancelCallback(err) {
-    //     console.log(err);
-    //   }
-    // }
-  // },
+  firebase: {
+    locations: {
+      source: db.ref('Campuses'),
+      cancelCallback(err) {
+        console.log(err);
+      }
+    }
+  },
 
   // components: {
   //   Tilly
   // },
-
   mounted: function() {
     this.bounds = new google.maps.LatLngBounds();
     const element = document.getElementById(this.mapCanvas)
     const mapCentre = this.campuses[0]
     const config = {
       zoom: 12,
-      center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude)
+      center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
+      styles: [
+        {
+          "featureType": "all",
+          "elementType": "all",
+          "stylers": [
+            {
+              "hue": "#ff6800"
+            },
+            {
+              "saturation": "20"
+            },
+            {
+              "lightness": "-8"
+            },
+            {
+              "gamma": "1.00"
+            },
+            {
+              "weight": "1.12"
+            }
+          ]
+        }
+      ]
     }
     this.map = new google.maps.Map(element, config);
 
@@ -68,6 +95,18 @@ export default {
       this.markers.push(marker)
       this.map.fitBounds(this.bounds.extend(position))
     });
+
+  },
+
+  methods: {
+    getCourses: function(evt, markers) {
+      for (var i = 0; i < this.locations.length; i++) {
+        if (this.locations.Name === evt.target.value) {
+          this.course = this.locations.Programmes[i];
+        }
+      }
+    }
+
   }
 
 };
@@ -80,6 +119,11 @@ export default {
   height: 600px;
   margin: 0 auto;
   background: gray;
+}
+
+.click {
+  margin-top: 20%;
+  color: red;
 }
 
 html,

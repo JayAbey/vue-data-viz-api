@@ -10,6 +10,7 @@ import VueResource from 'vue-resource'
 import VueFire from 'vuefire'
 //import the App component
 import App from './App'
+
 //tell Vue to use the router
 Vue.use(VueRouter)
 //tell Vue to use the resource
@@ -17,7 +18,7 @@ Vue.use(VueResource)
 //tel vue to use the vuefire
 Vue.use(VueFire)
 
-
+//import components
 import Jay from './components/Jay/Jay'
 import Jesse from './components/Jesse/Jesse'
 import Tilly from './components/Tilly/Tilly'
