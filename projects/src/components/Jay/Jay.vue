@@ -1,14 +1,15 @@
 <template>
   <div>
     <div class="yoobeeMap" :id="mapCanvas">
-      <!--<div id="infoWindowContent">
-        </div>-->
     </div>
 
     <!--<Tilly v-bind:tilly="tilly"></Tilly>-->
-    <!--<div class="click" v-on:click="getCourses">CLICK ME {{ course }}-->
-    <!--<div v-for="campus in campuses">{{ campus.Name }}</div>-->
-    <!--</div>-->
+    <!--<div class="click" v-on:click="getCourses">CLICK ME {{ course }} </div>-->
+
+    <!--<div v-for="location in locations">{{ location.Name }}
+      <div v-for="programme in location.Programmes"> {{ programme }} </div>
+    </div>-->
+
   </div>
 </template>
 
@@ -25,26 +26,26 @@ export default {
     return {
       mapCanvas: this.name + "-map",
 
-      // campuses: [{
-      //   name: "Auckland",
-      //   latitude: -36.856864,
-      //   longitude: 174.764417
-      // },
-      // {
-      //   name: "Christchurch",
-      //   latitude: -43.520430,
-      //   longitude: 172.567893
-      // },
-      // {
-      //   name: "Wellington",
-      //   latitude: -41.279016,
-      //   longitude: 174.780304
-      // }],
+      campuses: [{
+        name: "Auckland",
+        latitude: -36.856864,
+        longitude: 174.764417
+      },
+      {
+        name: "Christchurch",
+        latitude: -43.520430,
+        longitude: 172.567893
+      },
+      {
+        name: "Wellington",
+        latitude: -41.279016,
+        longitude: 174.780304
+      }],
 
       map: null,
       bounds: null,
       markers: [],
-      infowindow: null,
+      // infowindow: null,
       course: ''
     }
   },
@@ -62,17 +63,17 @@ export default {
   //   Tilly
   // },
   mounted: function() {
-    // const infoWindowContent = document.getElementById('infoWindowContent')
+
+    const infoWindowContent = '<div v-for="location in locations">{{ location.Description }} </div>';
     this.bounds = new google.maps.LatLngBounds();
-    // this.infowindow = new google.maps.InfoWindow({
-    //   content: this.locations.Description
-    // });
+    this.infowindow = new google.maps.InfoWindow({
+      content: infoWindowContent
+    });
     const element = document.getElementById(this.mapCanvas)
-    // const mapCentre = this.campuses[0]
+    const mapCentre = this.campuses[0]
     const config = {
       zoom: 12,
-      // center: new google.maps.LatLng(mapCentre.Latitude, mapCentre.Longitude),
-      center: new google.maps.LatLng(db.ref('Campuses').Latitude, db.ref('Campuses').Longitude),
+      center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
       styles: [
         {
           "featureType": "all",
@@ -99,9 +100,8 @@ export default {
     }
     this.map = new google.maps.Map(element, config);
 
-    // this.campuses.forEach((coord) => {
-    db.ref('Campuses').forEach((coord) => {
-      const position = new google.maps.LatLng(coord.Latitude, coord.Longitude);
+    this.campuses.forEach((coord) => {
+      const position = new google.maps.LatLng(coord.latitude, coord.longitude);
       const marker = new google.maps.Marker({
         position,
         map: this.map,
@@ -109,22 +109,26 @@ export default {
 
       this.markers.push(marker)
       this.map.fitBounds(this.bounds.extend(position))
+
+      marker.addListener('click', function() {
+          this.infowindow.open(this.map, marker);
+        });
     });
 
-    google.maps.event.addListener(marker, 'click', () => {
-      infowindow.open(this.map, marker);
-    });
+    // google.maps.event.addListener(marker, 'click', () => {
+    //   infowindow.open(this.map, marker);
+    // });
 
   },
 
   methods: {
-    // getCourses: function(evt, markers) {
-    //   for (var i = 0; i < this.locations.length; i++) {
-    //     if (this.locations.Name === evt.target.value) {
-    //       this.course = this.locations.Programmes[i];
-    //     }
-    //   }
-    // }
+    getCourses: function(evt, markers) {
+      for (var i = 0; i < this.locations.length; i++) {
+        if (this.locations.Name === evt.target.value) {
+          this.course = this.locations.Programmes[i];
+        }
+      }
+    }
 
   }
 
